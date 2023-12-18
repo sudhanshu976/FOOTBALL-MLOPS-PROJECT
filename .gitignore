@@ -1,3 +1,4 @@
 venv/
 END_TO_END_ML_PROJECT.egg-info/
 logs/
+artifacts/
