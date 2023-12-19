@@ -84,7 +84,9 @@ class ModelTrainer:
 
         except Exception as e:
             raise CustomException(e, sys)
-
+    def predict(self, X):
+        # Predict method for the trained model
+        return self.model.predict(X)
 
 if __name__ == "__main__":
     logging.info("Model Training Started")

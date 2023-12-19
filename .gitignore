@@ -2,3 +2,6 @@ venv/
 END_TO_END_ML_PROJECT.egg-info/
 logs/
 artifacts/
+src/__pycache__/
+src/components/__pycache__/
+src/pipline/__pycache__/
