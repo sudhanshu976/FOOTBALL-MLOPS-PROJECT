@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 
 from src.components.data_transformation import DataTransformer
+from src.components.model_trainer import ModelTrainer
+from src.components.config import Config
 
 @dataclass
 class DataIngestionConfig():
@@ -42,12 +44,4 @@ class DataIngestion:
         except Exception as e:
             raise CustomException(e, sys)
 
-if __name__ == "__main__":
-    obj = DataIngestion()
-    train_data, test_data = obj.initiate_data_ingestion()
-
-    data_transformation = DataTransformer()
-    transformed_train_data , transformed_test_data = data_transformation.transform((train_data, test_data))
-    data_transformation.save_transformed_data(transformed_train_data, transformed_test_data)
-    data_transformation.save_label_encoders()
 

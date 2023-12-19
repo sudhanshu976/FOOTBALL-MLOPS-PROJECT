@@ -1,10 +1,12 @@
 # data_transformation.py
+
 import os
+import sys
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 import joblib
 from src.logger import logging
-from src.exception import CustomException 
+from src.exception import CustomException
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from scipy.stats import boxcox
@@ -12,6 +14,8 @@ from scipy.stats import boxcox
 class DataTransformer(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.label_encoders = {}
+        self.team_encoder = LabelEncoder()
+        self.position_encoder = LabelEncoder()
 
     def drop_columns(self, df):
         columns_to_drop = ['player', 'name', 'height', 'goals', 'assists', 'yellow cards', 'second yellow cards', 'red cards',
@@ -19,19 +23,19 @@ class DataTransformer(BaseEstimator, TransformerMixin):
         df.drop(columns=columns_to_drop, axis=1, inplace=True)
 
     def encode_top_n_teams(self, df):
-        label_encoder = LabelEncoder()
         top_n_teams = df['team'].value_counts().nlargest(20).index
         df['team'] = df['team'].apply(lambda x: x if x in top_n_teams else 'Other')
-        df['team'] = label_encoder.fit_transform(df['team'])
-        logging.info(f"Encoded classes are :{label_encoder.classes_}")
+        df['team'] = self.team_encoder.fit_transform(df['team'])
+        class_mapping = dict(zip(self.team_encoder.classes_, self.team_encoder.transform(self.team_encoder.classes_)))
+        logging.info("Class Mapping for Team: %s", class_mapping)
 
     def encode_position_column(self, df):
         category_counts = df['position'].value_counts()
         categories_to_group = category_counts[category_counts < 500].index
         df['position'] = df['position'].replace(categories_to_group, 'Other')
-        label_encoder = LabelEncoder()
-        df['position'] = label_encoder.fit_transform(df['position'])
-        logging.info(f"Encoded classes are :{label_encoder.classes_}")
+        df['position'] = self.position_encoder.fit_transform(df['position'])
+        class_mapping = dict(zip(self.position_encoder.classes_, self.position_encoder.transform(self.position_encoder.classes_)))
+        logging.info("Class Mapping for Position: %s", class_mapping)
 
     def handle_appearance(self, df):
         median_appearance = df['appearance'].median()
@@ -41,7 +45,7 @@ class DataTransformer(BaseEstimator, TransformerMixin):
         non_zero_median = df[df['minutes played'] > 0]['minutes played'].median()
         df['minutes_played'] = df['minutes played'].replace(0, non_zero_median)
         df['minutes_played'], lamda_value = boxcox(df['minutes_played'] + 1)
-        logging.info(f"Lambda value for boxcox transformation is :{lamda_value}")
+        logging.info(f"Lambda value for boxcox transformation is: {lamda_value}")
 
     def create_binary_columns(self, df):
         df['games_injured'] = (df['games_injured'] == 0).astype(int)
@@ -115,4 +119,3 @@ if __name__ == "__main__":
     transformer.save_label_encoders()
 
     logging.info("Data Transformation Completed")
-

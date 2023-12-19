@@ -4,4 +4,7 @@ matplotlib
 seaborn
 scikit-learn==1.2.2
 Flask
+xgboost
+catboost
+lightgbm
 -e .
